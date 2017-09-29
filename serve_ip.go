@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os/exec"
@@ -24,13 +23,8 @@ func serveIpAllow(w http.ResponseWriter, req *http.Request) {
 }
 
 func ipAllow(r *http.Request, cookie *CookieValue) string {
-	_, allowedIps := isIpAlreadyAllowed(cookie.Envs, cookie.OfficeIp)
-
-	if allowedIps == "" {
-		allowedIps = cookie.OfficeIp
-	} else {
-		allowedIps += "," + cookie.OfficeIp
-	}
+	allowedIpLines := parseAllowIpsFile(cookie.Envs, cookie.OfficeIp)
+	allowedIps := joinAllowedIpLines(allowedIpLines)
 
 	out, err := exec.Command("/bin/bash", g_config.UpdateFirewallShell, cookie.Envs, allowedIps).Output()
 	if err != nil {
@@ -39,22 +33,7 @@ func ipAllow(r *http.Request, cookie *CookieValue) string {
 
 	shellOut := string(out)
 	log.Println(shellOut)
-	writeAllowIpFile(cookie.Envs, allowedIps)
+	saveAllowIpsFile(cookie.Envs, allowedIpLines)
 
 	return `设置成功`
-}
-
-func isIpAlreadyAllowed(envs, ip string) (bool, string) {
-	content, err := ioutil.ReadFile(envs + "-AllowIps.txt")
-	if err != nil {
-		return false, ""
-	}
-
-	strContent := string(content)
-	alreadyAllowed := strings.Contains(strContent, ip)
-	return alreadyAllowed, strContent
-}
-
-func writeAllowIpFile(env, content string) {
-	ioutil.WriteFile(env+"-AllowIps.txt", []byte(content), 0644)
 }

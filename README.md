@@ -3,7 +3,9 @@ Add current ip to firewall.
 
 ![image](https://user-images.githubusercontent.com/1940588/31004430-fbb69098-a4b9-11e7-8cd1-0d6fda3941cc.png)
 
-build:`env GOOS=linux GOARCH=amd64 go build -o go-ip-allow.linux.bin`<br/>
+build:
+`./gobin.sh`
+`env GOOS=linux GOARCH=amd64 go build -o go-ip-allow.linux.bin`<br/>
 config file go-ip-allow.toml:
 
 ```toml

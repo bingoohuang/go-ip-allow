@@ -95,6 +95,7 @@ minAjax({
     data: {},
     success: function (data) {
         $('myip').innerText = data.trim()
+        $('setIpAllowBtn').disabled = false
     }
 })
 

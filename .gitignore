@@ -15,3 +15,5 @@
 ipallow
 bindata.go
 .idea
+go-ip-allow.linux.bin
+go-ip-allow

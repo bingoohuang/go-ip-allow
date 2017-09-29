@@ -7,7 +7,7 @@ import (
 )
 
 func serverHome(w http.ResponseWriter, r *http.Request) {
-	ok, cookie := login(w, r)
+	ok, cookie := login(r)
 	msg := ""
 	if ok {
 		msg = ipAllow(r, cookie)
@@ -15,7 +15,7 @@ func serverHome(w http.ResponseWriter, r *http.Request) {
 	clearCookie(w)
 
 	envCheckboxes := ""
-	for _, env := range g_config.Envs {
+	for _, env := range conf.Envs {
 		envCheckboxes += fmt.Sprintf("<input class='env' type='checkbox' checked value='%v'>%v</input><br/>", env, env)
 	}
 

@@ -7,11 +7,11 @@ import (
 )
 
 func main() {
-	http.HandleFunc(g_config.ContextPath+"/", serverHome)
-	http.HandleFunc(g_config.ContextPath+"/favicon.png", serveFavicon)
-	http.HandleFunc(g_config.ContextPath+"/ipAllow", serveIpAllow) // 设置IP权限
+	http.HandleFunc(conf.ContextPath+"/", serverHome)
+	http.HandleFunc(conf.ContextPath+"/favicon.png", serveFavicon)
+	http.HandleFunc(conf.ContextPath+"/ipAllow", serveIpAllow) // 设置IP权限
 
-	sport := strconv.Itoa(g_config.ListenPort)
+	sport := strconv.Itoa(conf.ListenPort)
 	log.Println("start to listen at ", sport)
 
 	http.ListenAndServe(":"+sport, nil)

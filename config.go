@@ -35,8 +35,8 @@ func readIpAllowConfig() goIpAllowConfig {
 	return ipAllowConfig
 }
 
-var g_config goIpAllowConfig
+var conf goIpAllowConfig
 
 func init() {
-	g_config = readIpAllowConfig()
+	conf = readIpAllowConfig()
 }

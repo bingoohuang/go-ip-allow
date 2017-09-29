@@ -61,7 +61,7 @@ func getAccessToken(corpId, corpSecret string) (string, error) {
 
 func createWxQyLoginUrl(redirectUri, csrfToken string) string {
 	return "https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=" +
-		g_config.WxCorpId + "&agentid=" + strconv.FormatInt(g_config.WxAgentId, 10) + "&redirect_uri=" + redirectUri + "&state=" + csrfToken
+		conf.WxCorpId + "&agentid=" + strconv.FormatInt(conf.WxAgentId, 10) + "&redirect_uri=" + redirectUri + "&state=" + csrfToken
 }
 
 type CookieValue struct {
@@ -84,28 +84,28 @@ func writeCsrfTokenCookie(w http.ResponseWriter, csrfToken, officeIp, envs strin
 
 	json := string(cookieVal)
 	log.Println("csrf json:", json)
-	cipher, err := CBCEncrypt(g_config.EncryptKey, json)
+	cipher, err := CBCEncrypt(conf.EncryptKey, json)
 	if err != nil {
 		log.Println("CBCEncrypt cookie error", err)
 	}
 
-	cookie := http.Cookie{Name: g_config.CookieName, Value: cipher, Path: "/", MaxAge: 86400}
+	cookie := http.Cookie{Name: conf.CookieName, Value: cipher, Path: "/", MaxAge: 86400}
 	http.SetCookie(w, &cookie)
 }
 
 func clearCookie(w http.ResponseWriter) {
-	cookie := http.Cookie{Name: g_config.CookieName, Value: "", Path: "/", Expires: time.Now().AddDate(-1, 0, 0)}
+	cookie := http.Cookie{Name: conf.CookieName, Value: "", Path: "/", Expires: time.Now().AddDate(-1, 0, 0)}
 	http.SetCookie(w, &cookie)
 }
 
 func readLoginCookie(r *http.Request) *CookieValue {
-	cookie, _ := r.Cookie(g_config.CookieName)
+	cookie, _ := r.Cookie(conf.CookieName)
 	if cookie == nil {
 		return nil
 	}
 
 	log.Println("cookie value:", cookie.Value)
-	decrypted, _ := CBCDecrypt(g_config.EncryptKey, cookie.Value)
+	decrypted, _ := CBCDecrypt(conf.EncryptKey, cookie.Value)
 	if decrypted == "" {
 		return nil
 	}
@@ -193,22 +193,22 @@ func getUserInfo(accessToken, userId string) (*WxUserInfo, error) {
 	return &wxUserInfo, nil
 }
 
-func login(w http.ResponseWriter, r *http.Request) (bool, *CookieValue) {
+func login(r *http.Request) (bool, *CookieValue) {
 	loginCookie := readLoginCookie(r)
 	if loginCookie == nil {
 		return false, nil
 	}
 
-	ok, _ := tryLogin(loginCookie, w, r)
+	ok, _ := tryLogin(loginCookie, r)
 	return ok, loginCookie
 }
 
-func tryLogin(loginCookie *CookieValue, w http.ResponseWriter, r *http.Request) (bool, error) {
+func tryLogin(loginCookie *CookieValue, r *http.Request) (bool, error) {
 	code := r.FormValue("code")
 	state := r.FormValue("state")
 	log.Println("code:", code, ",state:", state)
 	if loginCookie != nil && code != "" && state == loginCookie.CsrfToken {
-		accessToken, err := getAccessToken(g_config.WxCorpId, g_config.WxCorpSecret)
+		accessToken, err := getAccessToken(conf.WxCorpId, conf.WxCorpSecret)
 		if err != nil {
 			return false, err
 		}

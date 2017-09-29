@@ -16,7 +16,7 @@ func serveIpAllow(w http.ResponseWriter, req *http.Request) {
 	csrfToken := RandomString(10)
 
 	writeCsrfTokenCookie(w, csrfToken, officeIp, envs)
-	url := createWxQyLoginUrl(g_config.RedirectUri, csrfToken)
+	url := createWxQyLoginUrl(conf.RedirectUri, csrfToken)
 	log.Println("wx login url:", url)
 
 	w.Write([]byte(url))
@@ -26,7 +26,7 @@ func ipAllow(r *http.Request, cookie *CookieValue) string {
 	allowedIpLines := parseAllowIpsFile(cookie.Envs, cookie.OfficeIp)
 	allowedIps := joinAllowedIpLines(allowedIpLines)
 
-	out, err := exec.Command("/bin/bash", g_config.UpdateFirewallShell, cookie.Envs, allowedIps).Output()
+	out, err := exec.Command("/bin/bash", conf.UpdateFirewallShell, cookie.Envs, allowedIps).Output()
 	if err != nil {
 		return `设置失败，执行SHELL错误` + err.Error()
 	}

@@ -25,7 +25,6 @@ bash scripts:
 export http_proxy=http://127.0.0.1:9999
 export https_proxy=http://127.0.0.1:9999
 go get -v -u github.com/BurntSushi/toml
-go get -v -u gopkg.in/kataras/iris.v6
 ```
 fish scripts:
 ```fish

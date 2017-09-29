@@ -1,0 +1,10 @@
+ContextPath = "/ipallow"
+ListenPort = 8182
+WxCorpId = "WxCorpId"
+WxCorpSecret  = "WxCorpSecret"
+WxAgentId = 1000003
+Envs = [ "DEV", "TEST", "DEMO", "PRODUCT" ]
+UpdateFirewallShell = "/home/ci/firewall/iphelp.sh"
+CookieName = "ip-allow"
+RedirectUri = "http://www.baidu.com"
+EncryptKey = "EncryptKey"

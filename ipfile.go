@@ -24,6 +24,11 @@ func joinAllowedIpLines(lines []IpFileLine) string {
 
 func parseAllowIpsFile(envs, ip string) []IpFileLine {
 	ipFileLines := make([]IpFileLine, 0)
+	ipFileLines = append(ipFileLines, IpFileLine{
+		Ip:  ip,
+		Day: time.Now().Format(time.RFC3339),
+	})
+
 	content, err := ioutil.ReadFile(envs + "-AllowIps.txt")
 	if err != nil {
 		return ipFileLines
@@ -32,7 +37,6 @@ func parseAllowIpsFile(envs, ip string) []IpFileLine {
 	strContent := string(content)
 	lines := strings.Split(strContent, "\n")
 
-	found := false
 	for _, line := range lines {
 		items := strings.SplitN(line, " ", 2)
 		fileLine := IpFileLine{
@@ -45,17 +49,8 @@ func parseAllowIpsFile(envs, ip string) []IpFileLine {
 			continue
 		}
 
-		if !found {
-			found = fileLine.Ip == ip
-		}
-
-		if !found {
+		if fileLine.Ip != ip {
 			ipFileLines = append(ipFileLines, fileLine)
-		} else {
-			ipFileLines = append(ipFileLines, IpFileLine{
-				Ip:  ip,
-				Day: time.Now().Format(time.RFC3339),
-			})
 		}
 	}
 

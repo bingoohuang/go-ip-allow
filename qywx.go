@@ -145,11 +145,7 @@ func getLoginUserId(accessToken, code string) (string, error) {
 		return "", err
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
+	body := readObjectBytes(resp.Body)
 
 	var wxLoginUserId WxLoginUserId
 	err = json.Unmarshal(body, &wxLoginUserId)

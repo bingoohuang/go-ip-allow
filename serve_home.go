@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"log"
 )
 
 func serverHome(w http.ResponseWriter, r *http.Request) {
-	ok, cookie := login(r)
+	logined, cookie := login(r)
+	log.Println("logined:", logined, ",cookie", cookie)
 	msg := ""
-	if ok {
-		msg = ipAllow(r, cookie)
+	if logined {
+		msg = ipAllow(cookie)
 	}
 	clearCookie(w)
 
@@ -21,7 +23,7 @@ func serverHome(w http.ResponseWriter, r *http.Request) {
 
 	html := string(MustAsset("res/index.html"))
 	js := string(MustAsset("res/index.js"))
-	if ok {
+	if logined {
 		js = strings.Replace(js, "/*.ALERTS*/", `alert('`+msg+`')`, 1)
 	}
 

@@ -22,7 +22,7 @@ func serveIpAllow(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(url))
 }
 
-func ipAllow(r *http.Request, cookie *CookieValue) string {
+func ipAllow(cookie *CookieValue) string {
 	allowedIpLines := parseAllowIpsFile(cookie.Envs, cookie.OfficeIp)
 	allowedIps := joinAllowedIpLines(allowedIpLines)
 

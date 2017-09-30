@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -36,16 +35,13 @@ func getAccessToken(corpId, corpSecret string) (string, error) {
 		return accessToken, nil
 	}
 
+	accessToken = ""
+
 	url := "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + corpId + "&corpsecret=" + corpSecret
-	log.Println("url:", url)
-	resp, err := http.Get(url)
-	log.Println("resp:", resp, ",err:", err)
+	body, err := httpGet(url)
 	if err != nil {
-		accessToken = ""
 		return "", err
 	}
-
-	body := readObjectBytes(resp.Body)
 
 	var tokenResult TokenResult
 	json.Unmarshal(body, &tokenResult)
@@ -138,14 +134,10 @@ type WxLoginUserId struct {
 
 func getLoginUserId(accessToken, code string) (string, error) {
 	url := "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=" + accessToken + "&code=" + code
-	log.Println("url:", url)
-	resp, err := http.Get(url)
-	log.Println("resp:", resp, ",err:", err)
+	body, err := httpGet(url)
 	if err != nil {
 		return "", err
 	}
-
-	body := readObjectBytes(resp.Body)
 
 	var wxLoginUserId WxLoginUserId
 	err = json.Unmarshal(body, &wxLoginUserId)
@@ -167,15 +159,7 @@ type WxUserInfo struct {
 
 func getUserInfo(accessToken, userId string) (*WxUserInfo, error) {
 	url := "https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=" + accessToken + "&userid=" + userId
-	log.Println("url:", url)
-	resp, err := http.Get(url)
-	log.Println("resp:", resp, ",err:", err)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := httpGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -187,38 +171,4 @@ func getUserInfo(accessToken, userId string) (*WxUserInfo, error) {
 	}
 
 	return &wxUserInfo, nil
-}
-
-func login(r *http.Request) (bool, *CookieValue) {
-	loginCookie := readLoginCookie(r)
-	if loginCookie == nil {
-		return false, nil
-	}
-
-	ok, _ := tryLogin(loginCookie, r)
-	return ok, loginCookie
-}
-
-func tryLogin(loginCookie *CookieValue, r *http.Request) (bool, error) {
-	code := r.FormValue("code")
-	state := r.FormValue("state")
-	log.Println("code:", code, ",state:", state)
-	if loginCookie != nil && code != "" && state == loginCookie.CsrfToken {
-		accessToken, err := getAccessToken(conf.WxCorpId, conf.WxCorpSecret)
-		if err != nil {
-			return false, err
-		}
-		userId, err := getLoginUserId(accessToken, code)
-		if err != nil {
-			return false, err
-		}
-		_, err = getUserInfo(accessToken, userId)
-		if err != nil {
-			return false, err
-		}
-
-		return true, nil
-	}
-
-	return false, errors.New("no login")
 }

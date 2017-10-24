@@ -89,14 +89,8 @@ function minAjax(config) {
     }
 }
 
-minAjax({
-    url: "http://icanhazip.com",
-    type: "GET",
-    data: {},
-    success: function (data) {
-        $('myip').innerText = data.trim()
-        $('setIpAllowBtn').disabled = false
-    }
-})
+$('myip').innerText = returnCitySN.cip
+$('setIpAllowBtn').disabled = false
+
 
 /*.ALERTS*/

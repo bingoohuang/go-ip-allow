@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/html"
+	"github.com/tdewolff/minify/js"
 	"log"
 	"net/http"
 	"strings"
@@ -22,13 +25,16 @@ func serverHome(w http.ResponseWriter, r *http.Request) {
 		envCheckboxes += fmt.Sprintf("<input class='env' type='checkbox' checked value='%v'>%v</input><br/>", env, env)
 	}
 
-	html := string(MustAsset("res/index.html"))
 	js := string(MustAsset("res/index.js"))
 	if logined {
 		js = strings.Replace(js, "/*.ALERTS*/", `alert('`+msg+`')`, 1)
 	}
 
+	js = minifyJs(js, false)
+
+	html := string(MustAsset("res/index.html"))
 	html = strings.Replace(html, "<envCheckboxes/>", envCheckboxes, 1)
+	html = minifyHtml(html, false)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
 
 	w.Write([]byte(html))
@@ -42,6 +48,30 @@ func login(r *http.Request) (bool, *CookieValue) {
 
 	ok, _ := tryLogin(loginCookie, r)
 	return ok, loginCookie
+}
+
+func minifyHtml(htmlStr string, devMode bool) string {
+	if devMode {
+		return htmlStr
+	}
+
+	mini := minify.New()
+	mini.AddFunc("text/html", html.Minify)
+	minified, _ := mini.String("text/html", htmlStr)
+	return minified
+}
+
+func minifyJs(mergedJs string, devMode bool) string {
+	if devMode {
+		return mergedJs
+	}
+
+	mini := minify.New()
+	mini.AddFunc("text/javascript", js.Minify)
+
+	minifiedJs, _ := mini.String("text/javascript", mergedJs)
+
+	return minifiedJs
 }
 
 func tryLogin(loginCookie *CookieValue, r *http.Request) (bool, error) {

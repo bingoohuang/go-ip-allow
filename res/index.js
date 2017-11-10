@@ -89,7 +89,11 @@ function minAjax(config) {
     }
 }
 
-$('myip').innerText = returnCitySN.cip
+if (returnCitySN.cip && returnCitySN.cip.length > 0 ) {
+    $('myip').innerText = returnCitySN.cip
+} else {
+    $('myip').innerText = '请填入下方所显示的IP'
+}
 $('setIpAllowBtn').disabled = false
 
 

@@ -65,7 +65,7 @@ function minAjax(config) {
             var datum = tmpArr[i].split('=')
             sendString.push(encodeURIComponent(datum[0]) + "=" + encodeURIComponent(datum[1]))
         }
-    } else if (typeof sendData === 'object' && !( sendData instanceof String || (FormData && sendData instanceof FormData) )) {
+    } else if (typeof sendData === 'object' && !(sendData instanceof String || (FormData && sendData instanceof FormData))) {
         for (var k in sendData) {
             var datum = sendData[k]
             if (Object.prototype.toString.call(datum) == "[object Array]") {
@@ -89,12 +89,30 @@ function minAjax(config) {
     }
 }
 
-if (returnCitySN.cip && returnCitySN.cip.length > 0 ) {
-    $('myip').innerText = returnCitySN.cip
-} else {
-    $('myip').innerText = '请填入下方所显示的IP'
+//this function will work cross-browser for loading scripts asynchronously
+function loadScript(src, callback) {
+    var r = false
+    var s = document.createElement('script')
+    s.async = true
+    s.type = 'text/javascript'
+    s.src = src
+    s.onload = s.onreadystatechange = function () {
+        // console.log( this.readyState ); // uncomment this line to see which ready states are called.
+        if (!r && (!this.readyState || this.readyState == 'complete')) {
+            r = true
+            callback()
+        }
+    }
+    var t = document.getElementsByTagName('script')[0]
+    t.parentNode.insertBefore(s, t)
 }
-$('setIpAllowBtn').disabled = false
 
+loadScript("http://pv.sohu.com/cityjson/getip.aspx", function () {
+    if (returnCitySN.cip && returnCitySN.cip.length > 0) {
+        $('myip').innerText = returnCitySN.cip
+    } else {
+        $('myip').innerText = '请填入下方所显示的IP'
+    }
+})
 
 /*.ALERTS*/

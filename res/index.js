@@ -1,13 +1,22 @@
 function setIpAllow() {
+    if (!$('myip').value.match(ipRegex)) {
+        alert('请在输入正确的IP后，再设置！')
+        $('myip').focus()
+        return
+    }
     minAjax({
         url: "/ipAllow",
         type: "POST",
         data: {
             envs: getCheckedValues('env'),
-            officeIp: $('myip').innerText
+            officeIp: $('myip').value
         },
         success: function (redirectUrl) {
-            window.location = redirectUrl
+            if (redirectUrl.indexOf('http') == 0) {
+                window.location = redirectUrl
+            } else {
+                alert(redirectUrl)
+            }
         }
     })
 }
@@ -107,11 +116,16 @@ function loadScript(src, callback) {
     t.parentNode.insertBefore(s, t)
 }
 
+var ipRegex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
+
 loadScript("http://pv.sohu.com/cityjson/getip.aspx", function () {
-    if (returnCitySN.cip && returnCitySN.cip.length > 0) {
-        $('myip').innerText = returnCitySN.cip
+    if ($('myip').value.match(ipRegex)) return
+
+    var cip = returnCitySN.cip
+    if (cip && cip.length > 0) {
+        $('myip').value = cip
     } else {
-        $('myip').innerText = '请填入下方所显示的IP'
+        $('myip').value = '识别失败，请手工输入IP或者拷贝下面的IP后设置。'
     }
 })
 

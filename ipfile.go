@@ -44,6 +44,10 @@ func parseAllowIpsFile(envs, ip string) []IpFileLine {
 			Day: items[1],
 		}
 
+		if fileLine.Ip == "" {
+			continue
+		}
+
 		day, _ := time.Parse(time.RFC3339, fileLine.Day)
 		if time.Now().Sub(day).Hours() > 24 {
 			continue

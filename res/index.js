@@ -119,7 +119,7 @@ function loadScript(src, callback) {
 var ipRegex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 
 function setIp(json) {
-    console.log('开始uevi ip:' + JSON.stringify(json))
+    console.log('开始设置IP:' + JSON.stringify(json))
     var ip = json.ip || json.query
     if ($('myip').value.match(ipRegex)) {
         console.log('已经设置，跳过')
@@ -137,7 +137,12 @@ loadScript("http://pv.sohu.com/cityjson/getip.aspx", function () {
     setIp({ip: returnCitySN.cip})
 })
 
+// {"ip":"180.111.235.50"}
 loadScript("https://api.ipify.org?format=jsonp&callback=setIp")
+
+// {"as":"AS4134 No.31,Jin-rong Street","city":"Nanjing","country":"China","countryCode":"CN","isp":"China Telecom jiangsu",
+// "lat":32.0617,"lon":118.7778,"org":"China Telecom jiangsu","query":"180.111.235.50","region":"32","regionName":"Jiangsu",
+// "status":"success","timezone":"Asia/Shanghai","zip":""}
 loadScript("http://ip-api.com/json/?callback=setIp")
 
 /*.ALERTS*/

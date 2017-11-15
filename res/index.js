@@ -109,7 +109,7 @@ function loadScript(src, callback) {
         // console.log( this.readyState ); // uncomment this line to see which ready states are called.
         if (!r && (!this.readyState || this.readyState == 'complete')) {
             r = true
-            callback()
+            if (callback) callback()
         }
     }
     var t = document.getElementsByTagName('script')[0]
@@ -118,15 +118,26 @@ function loadScript(src, callback) {
 
 var ipRegex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 
-loadScript("http://pv.sohu.com/cityjson/getip.aspx", function () {
-    if ($('myip').value.match(ipRegex)) return
+function setIp(json) {
+    console.log('开始uevi ip:' + JSON.stringify(json))
+    var ip = json.ip || json.query
+    if ($('myip').value.match(ipRegex)) {
+        console.log('已经设置，跳过')
+        return
+    }
 
-    var cip = returnCitySN.cip
-    if (cip && cip.length > 0) {
-        $('myip').value = cip
+    if (ip && ip.length > 0) {
+        $('myip').value = ip
     } else {
         $('myip').value = '识别失败，请手工输入IP或者拷贝下面的IP后设置。'
     }
+}
+
+loadScript("http://pv.sohu.com/cityjson/getip.aspx", function () {
+    setIp({ip: returnCitySN.cip})
 })
+
+loadScript("https://api.ipify.org?format=jsonp&callback=setIp")
+loadScript("http://ip-api.com/json/?callback=setIp")
 
 /*.ALERTS*/

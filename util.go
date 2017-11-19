@@ -6,7 +6,9 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -70,4 +72,16 @@ func httpGet(url string) ([]byte, error) {
 
 	respBody := readObjectBytes(resp.Body)
 	return respBody, nil
+}
+
+func GetIp(req *http.Request) string {
+	// "X-Forwarded-For"/ "x-forwarded-for"/"X-FORWARDED-FOR"  // capitalisation  doesn't matter
+	xForwardedFor := req.Header.Get("X-FORWARDED-FOR")
+	if xForwardedFor != "" {
+		proxyIps := strings.Split(xForwardedFor, ",")
+		return proxyIps[0]
+	}
+
+	ip, _, _ := net.SplitHostPort(req.RemoteAddr)
+	return ip
 }

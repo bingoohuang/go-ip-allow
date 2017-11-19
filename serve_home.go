@@ -36,6 +36,7 @@ func serverHome(w http.ResponseWriter, r *http.Request) {
 	html = strings.Replace(html, "<envCheckboxes/>", envCheckboxes, 1)
 	html = minifyHtml(html, false)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
+	html = strings.Replace(html, "/*.AUTOIP*/", GetIp(r), 1)
 
 	w.Write([]byte(html))
 }

@@ -36,7 +36,13 @@ func serverHome(w http.ResponseWriter, r *http.Request) {
 	html = strings.Replace(html, "<envCheckboxes/>", envCheckboxes, 1)
 	html = minifyHtml(html, false)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
-	html = strings.Replace(html, "/*.AUTOIP*/", GetIp(r), 1)
+	clientIP := GetIp(r)
+	isPrivateIP, _ := IsPrivateIP(clientIP)
+	if isPrivateIP {
+		clientIP = "识别中请稍待,或请拷贝下面的IP后设置。"
+	}
+
+	html = strings.Replace(html, "/*.AUTOIP*/", clientIP, 1)
 
 	w.Write([]byte(html))
 }

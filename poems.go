@@ -7,40 +7,53 @@ import (
 )
 
 type Poem struct {
-	Title string
+	Title     string
 	TitleCode string
-	Author string
-	Lines []string
+	Author    string
+	Lines     []string
 	LinesCode []string
 }
 
-func ParsePoems() []Poem {
+func ParsePoems(poemFile string) []Poem {
 	poems := make([]Poem, 0)
-	poemsBytes, err := ioutil.ReadFile("./poems.txt")
+	poemsBytes, err := ioutil.ReadFile(poemFile)
 	if err != nil {
 		fmt.Println("read poems error", err.Error())
 		return poems
 	}
 
-	lines := strings.Split(string(poemsBytes), "\n")
-	var poem *Poem = nil
+	fileLines := strings.Split(string(poemsBytes), "\n")
 
-	for _, line := range lines {
-		l := strings.TrimSpace(line)
+	for i := 0; i < len(fileLines); i++ {
+		l := strings.TrimSpace(fileLines[i])
+
 		if l == "" {
-			if poem != nil {
-				poems = append(poems, *poem)
-				poem = nil
-			}
-		} else {
-			strings.SplitN(l, "#", 2)
-			
-			if poem == nil {
-				poem = &Poem {
-					Title:l,
-				}
-			}
+			continue
 		}
+
+		titleFields := strings.SplitN(l, "#", 2)
+		i++
+		author := strings.TrimSpace(fileLines[i])
+
+		lines := make([]string, 0)
+		linesCode := make([]string, 0)
+		for i++; i < len(fileLines); i++ {
+			if fileLines[i] == "" {
+				break
+			}
+
+			lineFields := strings.SplitN(fileLines[i], "#", 2)
+			lines = append(lines, lineFields[0])
+			linesCode = append(linesCode, lineFields[1])
+		}
+
+		poems = append(poems, Poem{
+			Title:     titleFields[0],
+			TitleCode: titleFields[1],
+			Author:    author,
+			Lines:     lines,
+			LinesCode: linesCode,
+		})
 	}
 
 	return poems

@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func serverHome(w http.ResponseWriter, r *http.Request) {
+func serveHome(w http.ResponseWriter, r *http.Request) {
 	logined, cookie := login(r)
 	log.Println("logined:", logined, ",cookie", cookie)
 	msg := ""

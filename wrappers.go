@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"bytes"
 	"net/http"
+	"time"
 )
 
 func BasicAuth(fn http.HandlerFunc) http.HandlerFunc {
@@ -20,11 +21,20 @@ func BasicAuth(fn http.HandlerFunc) http.HandlerFunc {
 			if err == nil {
 				pair := bytes.SplitN(payload, []byte(":"), 2)
 
-				if len(pair) == 2 &&
-					string(pair[0]) == auths[0] &&
-					EqualAny(string(pair[1]), auths[1:]) {
-					fn(w, r) // 执行被装饰的函数
-					return
+				if len(pair) == 2 {
+					user := string(pair[0])
+					pass := string(pair[1])
+
+					poems := ParsePoems("./poems.txt")
+					now := time.Now()
+					poemsIndex := now.Day() % len(poems)
+					poem := poems[poemsIndex]
+					linesIndex := int(now.Weekday()) % len(poem.LinesCode)
+
+					if user == poem.TitleCode && pass == poem.LinesCode[linesIndex] {
+						fn(w, r) // 执行被装饰的函数
+						return
+					}
 				}
 			}
 		}
@@ -35,15 +45,3 @@ func BasicAuth(fn http.HandlerFunc) http.HandlerFunc {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 }
-
-func EqualAny(passwd string, anys []string) bool {
-	for _, any := range anys {
-		if any == passwd {
-			return true
-		}
-	}
-
-	return false
-}
-
-var auths = []string{"zywgqg", "Ca1p)Whd1s", "Qfc!jZ4ygq", "?rphlLr8yz"}

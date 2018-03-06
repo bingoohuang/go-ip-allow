@@ -2,18 +2,14 @@ package main
 
 import (
 	"net/http"
-	"time"
 	"strings"
+	"github.com/bingoohuang/go-utils"
 )
 
 func serveWelcome(w http.ResponseWriter, r *http.Request) {
 	welcome := string(MustAsset("res/welcome.html"))
 
-	poems := ParsePoems("./poems.txt")
-	now := time.Now()
-	poemsIndex := now.Day() % len(poems)
-	poem := poems[poemsIndex]
-	linesIndex := int(now.Weekday()) % len(poem.LinesCode)
+	poem, linesIndex := go_utils.RandomPoem()
 
 	welcome = strings.Replace(welcome, "<PoemTitle/>", poem.Title, 1)
 	welcome = strings.Replace(welcome, "<PoemAuthor/>", poem.Author, 1)

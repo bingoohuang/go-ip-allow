@@ -5,7 +5,7 @@ function setIpAllow() {
         return
     }
     minAjax({
-        url: "/ipAllow",
+        url: contextPath + "/ipAllow",
         type: "POST",
         data: {
             envs: getCheckedValues('env'),

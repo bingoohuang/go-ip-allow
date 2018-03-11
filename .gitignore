@@ -12,8 +12,13 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
-ipallow
+
 bindata.go
 .idea
-./go-ip-allow.linux.bin
+
+go-ip-allow.linux.bin
+go-ip-allow.linux.bin.bz2
+
+.DS_Store
+
 go-ip-allow

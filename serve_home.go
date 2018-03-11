@@ -36,6 +36,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	html = strings.Replace(html, "<envCheckboxes/>", envCheckboxes, 1)
 	html = minifyHtml(html, false)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
+	html = strings.Replace(html, "${ContextPath}", conf.ContextPath, -1)
 	clientIP := GetIp(r)
 	isPrivateIP, _ := IsPrivateIP(clientIP)
 	if isPrivateIP {

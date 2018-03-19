@@ -13,7 +13,7 @@ type goIpAllowConfig struct {
 	UpdateFirewallShell string   // 更新防火墙IP脚本
 	WxCorpId            string
 	WxCorpSecret        string
-	WxAgentId           int64
+	WxAgentId           string
 	EncryptKey          string
 	CookieName          string
 	RedirectUri         string

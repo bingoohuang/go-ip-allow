@@ -3,42 +3,33 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/tdewolff/minify"
-	"github.com/tdewolff/minify/html"
-	"github.com/tdewolff/minify/js"
+	"github.com/bingoohuang/go-utils"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	logined, cookie := login(r)
-	log.Println("logined:", logined, ",cookie", cookie)
-	msg := ""
-	if logined {
-		msg = ipAllow(cookie)
-	}
-	clearCookie(w)
-
+func serveHome(w http.ResponseWriter, r *http.Request, msg string) {
 	envCheckboxes := ""
 	for _, env := range conf.Envs {
 		envCheckboxes += fmt.Sprintf("<input class='env' type='checkbox' checked value='%v'>%v</input><br/>", env, env)
 	}
 
 	js := string(MustAsset("res/index.js"))
-	if logined {
+	if msg != "" {
 		js = strings.Replace(js, "/*.ALERTS*/", `alert('`+msg+`')`, 1)
 	}
 
-	js = minifyJs(js, false)
+	js = go_utils.MinifyJs(js, false)
 
 	html := string(MustAsset("res/index.html"))
 	html = strings.Replace(html, "<envCheckboxes/>", envCheckboxes, 1)
-	html = minifyHtml(html, false)
+	html = go_utils.MinifyHtml(html, false)
 	html = strings.Replace(html, "/*.SCRIPT*/", js, 1)
 	html = strings.Replace(html, "${ContextPath}", conf.ContextPath, -1)
-	clientIP := GetIp(r)
-	isPrivateIP, _ := IsPrivateIP(clientIP)
+	clientIP := go_utils.GetClientIp(r)
+	isPrivateIP, _ := go_utils.IsPrivateIP(clientIP)
 	if isPrivateIP {
 		clientIP = "识别中请稍待,或请拷贝下面的IP后设置。"
 	}
@@ -48,80 +39,63 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(html))
 }
 
-func login(r *http.Request) (bool, *CookieValue) {
-	loginCookie := readLoginCookie(r)
-	if loginCookie == nil {
-		return false, nil
-	}
-
-	ok, _ := tryLogin(loginCookie, r)
-	return ok, loginCookie
+type CookieValue struct {
+	OfficeIp  string
+	Envs      string
+	CsrfToken string
+	Expired   time.Time
 }
 
-func minifyHtml(htmlStr string, devMode bool) string {
-	if devMode {
-		return htmlStr
-	}
-
-	mini := minify.New()
-	mini.AddFunc("text/html", html.Minify)
-	minified, _ := mini.String("text/html", htmlStr)
-	return minified
+func (t *CookieValue) ExpiredTime() time.Time {
+	return t.Expired
 }
 
-func minifyJs(mergedJs string, devMode bool) string {
-	if devMode {
-		return mergedJs
+func login(r *http.Request) (string, *CookieValue) {
+	cookieValue := &CookieValue{}
+	err := go_utils.ReadCookie(r, conf.EncryptKey, conf.CookieName, cookieValue)
+	if err != nil {
+		return "", nil
 	}
 
-	mini := minify.New()
-	mini.AddFunc("text/javascript", js.Minify)
-
-	minifiedJs, _ := mini.String("text/javascript", mergedJs)
-
-	return minifiedJs
+	loginUserName, _ := tryLogin(cookieValue, r)
+	return loginUserName, cookieValue
 }
 
-func tryLogin(loginCookie *CookieValue, r *http.Request) (bool, error) {
+func tryLogin(loginCookie *CookieValue, r *http.Request) (string, error) {
 	code := r.FormValue("code")
 	state := r.FormValue("state")
 	log.Println("code:", code, ",state:", state)
 	if loginCookie != nil && code != "" && state == loginCookie.CsrfToken {
-		accessToken, err := getAccessToken(conf.WxCorpId, conf.WxCorpSecret)
+		accessToken, err := go_utils.GetAccessToken(conf.WxCorpId, conf.WxCorpSecret)
 		if err != nil {
-			return false, err
+			return "", err
 		}
-		userId, err := getLoginUserId(accessToken, code)
+		userId, err := go_utils.GetLoginUserId(accessToken, code)
 		if err != nil {
-			return false, err
+			return "", err
 		}
-		userInfo, err := getUserInfo(accessToken, userId)
+		userInfo, err := go_utils.GetUserInfo(accessToken, userId)
 		if err != nil {
-			return false, err
+			return "", err
 		}
 
 		sendLoginInfo(userInfo, loginCookie, accessToken)
 
-		return true, nil
+		return userInfo.Name, nil
 	}
 
-	return false, errors.New("no login")
+	return "", errors.New("no login")
 }
 
-func sendLoginInfo(info *WxUserInfo, loginCookie *CookieValue, accessToken string) {
+func sendLoginInfo(info *go_utils.WxUserInfo, loginCookie *CookieValue, accessToken string) {
 	msg := map[string]interface{}{
-		"touser":  "@all",
-		"toparty": "@all",
-		"totag":   "@all",
-		"msgtype": "text",
-		"agentid": conf.WxAgentId,
+		"touser": "@all", "toparty": "@all", "totag": "@all", "msgtype": "text", "agentid": conf.WxAgentId, "safe": 0,
 		"text": map[string]string{
 			"content": "用户[" + info.Name + "]正在扫码设置IP[" + loginCookie.OfficeIp + "]，环境[" + loginCookie.Envs + "]",
 		},
-		"safe": 0,
 	}
 	url := "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + accessToken
-	_, err := httpPost(url, msg)
+	_, err := go_utils.HttpPost(url, msg)
 	if err != nil {
 		log.Println("sendLoginInfo error", err)
 	}

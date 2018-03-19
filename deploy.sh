@@ -13,6 +13,6 @@ cd ./firewall
 ps -ef|grep $deployName|grep -v grep|awk '{print \$2}'|xargs -r kill -9
 rm $deployName.linux.bin
 bzip2 -d $deployName.linux.bin.bz2
-nohup ./$deployName.linux.bin > $deployName.out 2>&1 &
+nohup ./$deployName.linux.bin 2>&1 >> go-ip-allow.log &
 exit
 eeooff

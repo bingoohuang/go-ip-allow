@@ -22,3 +22,4 @@ go-ip-allow.linux.bin.bz2
 .DS_Store
 
 go-ip-allow
+vendor

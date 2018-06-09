@@ -11,9 +11,6 @@ type goIpAllowConfig struct {
 	Envs                []string // 环境
 	ListenPort          int      // 监听端口
 	UpdateFirewallShell string   // 更新防火墙IP脚本
-	WxCorpId            string
-	WxCorpSecret        string
-	WxAgentId           string
 	EncryptKey          string
 	CookieName          string
 	RedirectUri         string

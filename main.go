@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"encoding/json"
 )
 
 func main() {
-	http.HandleFunc(conf.ContextPath+"/", serveWelcome)
-	http.HandleFunc(conf.ContextPath+"/home", go_utils.RandomPoemBasicAuth(serveToolsIndex))
-	http.HandleFunc(conf.ContextPath+"/favicon.png", serveFavicon)
-	http.HandleFunc(conf.ContextPath+"/ipAllow", go_utils.RandomPoemBasicAuth(serveIpAllow)) // 设置IP权限
+	http.HandleFunc(conf.ContextPath+"/", MustAuth(serveToolsIndex))
+	http.HandleFunc(conf.ContextPath+"/favicon.png", go_utils.ServeFavicon("res/favicon.png", MustAsset, AssetInfo))
+	http.HandleFunc(conf.ContextPath+"/ipAllow", MustAuth(serveIpAllow)) // 设置IP权限
 
 	sport := strconv.Itoa(conf.ListenPort)
 	log.Println("start to listen at ", sport)
@@ -20,36 +20,25 @@ func main() {
 	http.ListenAndServe(":"+sport, nil)
 }
 
-func serveWelcome(w http.ResponseWriter, r *http.Request) {
-	welcome := MustAsset("res/welcome.html")
+func MustAuth(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cookie := CookieValue{}
+		go_utils.ReadCookie(r, conf.EncryptKey, conf.CookieName, &cookie)
+		if cookie.Name != "" {
+			json, _ := json.Marshal(&cookie)
+			r.Header.Set("CookieValue", string(json))
+			fn(w, r) // 执行被装饰的函数
+			return
+		}
 
-	go_utils.ServeWelcome(w, welcome, conf.ContextPath)
+		http.Redirect(w, r, conf.RedirectUri, 302)
+	}
 }
 
 func serveToolsIndex(w http.ResponseWriter, r *http.Request) {
-	forceReset := r.FormValue("forceReset")
-
-	if forceReset == "1" {
-		serveHome(w, r, "")
-		return
-	}
-
-	loginUserName, cookie := login(r)
-	log.Println("loginUserName:", loginUserName, ",cookie", cookie)
-	msg := ""
-	if loginUserName != "" {
-		newIpFileLine, err := ipAllow(cookie, loginUserName)
-		if err == nil {
-			go_utils.ClearCookie(w, conf.CookieName)
-			serveTools(cookie.OfficeIp, newIpFileLine, w)
-			return
-		}
-		msg = err.Error()
-	}
-
 	alreadySet, clientIp, ipFileLine := isIpAlreadySet(r)
 	if !alreadySet {
-		serveHome(w, r, msg)
+		serveHome(w, r)
 		return
 	}
 

@@ -21,9 +21,84 @@
     <button id="setIpAllowBtn" autofocus onclick="setIpAllow()" style="font-size: 14px; padding: 3px 106px;">设置</button>
 </div>
 </body>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <script>
-    /*.SCRIPT*/
-
     var contextPath = '${ContextPath}'
+
+    function setIpAllow() {
+        if (!$('#myip').value.match(ipRegex)) {
+            alert('请在输入正确的IP后，再设置！')
+            $('myip').focus()
+            return
+        }
+        $.ajax({
+            type: "POST",
+            url: contextPath + "/ipAllow",
+            data: {
+                envs: getCheckedValues(),
+                officeIp: $('#myip').value
+            },
+            success: function (context) {
+                alert(context)
+            }
+        })
+    }
+
+    function getCheckedValues() {
+        var checkedValue = []
+        $('.env:checked').each(function () {
+            checkedValue.push($(this).val())
+        })
+        return checkedValue.join(',')
+    }
+
+    //this function will work cross-browser for loading scripts asynchronously
+    function loadScript(src, callback) {
+        var r = false
+        var s = document.createElement('script')
+        s.async = true
+        s.type = 'text/javascript'
+        s.src = src
+        s.onload = s.onreadystatechange = function () {
+            // console.log( this.readyState ); // uncomment this line to see which ready states are called.
+            if (!r && (!this.readyState || this.readyState == 'complete')) {
+                r = true
+                if (callback) callback()
+            }
+        }
+        var t = document.getElementsByTagName('script')[0]
+        t.parentNode.insertBefore(s, t)
+    }
+
+    var ipRegex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
+
+    function setIp(json) {
+        console.log('开始设置IP:' + JSON.stringify(json))
+        var ip = json.ip || json.query
+        if ($('#myip').val().match(ipRegex)) {
+            console.log('已经设置，跳过')
+            return
+        }
+
+        if (ip && ip.length > 0) {
+            $('#myip').val(ip)
+        } else {
+            $('#myip').val('识别失败，请手工输入IP或者拷贝下面的IP后设置。')
+        }
+    }
+
+    loadScript("http://pv.sohu.com/cityjson/getip.aspx", function () {
+        setIp({ip: returnCitySN.cip})
+    })
+
+    // {"ip":"180.111.235.50"}
+    loadScript("https://api.ipify.org?format=jsonp&callback=setIp")
+
+    // {"as":"AS4134 No.31,Jin-rong Street","city":"Nanjing","country":"China","countryCode":"CN","isp":"China Telecom jiangsu",
+    // "lat":32.0617,"lon":118.7778,"org":"China Telecom jiangsu","query":"180.111.235.50","region":"32","regionName":"Jiangsu",
+    // "status":"success","timezone":"Asia/Shanghai","zip":""}
+    loadScript("http://ip-api.com/json/?callback=setIp")
+
+
 </script>
 </html>

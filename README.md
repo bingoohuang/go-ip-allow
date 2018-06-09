@@ -32,3 +32,18 @@ set -x http_proxy http://127.0.0.1:9999
 set -x https_proxy http://127.0.0.1:9999
 go get -v -u github.com/BurntSushi/toml
 ```
+
+
+## Nginx config
+```nginx
+    server {
+        listen 8000;
+        server_name ip.a.b;
+
+        location / {
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $host;
+            proxy_pass http://localhost:8182;
+        }
+      }
+```

@@ -14,6 +14,7 @@ type goIpAllowConfig struct {
 	EncryptKey          string
 	CookieName          string
 	RedirectUri         string
+	LocalUrl            string
 }
 
 func readIpAllowConfig() goIpAllowConfig {

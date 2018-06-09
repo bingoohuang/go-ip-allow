@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/bingoohuang/go-utils"
 	"log"
 	"net/http"
+	url2 "net/url"
 	"strconv"
 	"strings"
-	"encoding/json"
 )
 
 func main() {
@@ -31,11 +33,19 @@ func MustAuth(fn http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		http.Redirect(w, r, conf.RedirectUri, 302)
+		url := conf.RedirectUri + "?redirect=" + url2.QueryEscape(conf.LocalUrl)
+
+		http.Redirect(w, r, url, 302)
 	}
 }
 
 func serveToolsIndex(w http.ResponseWriter, r *http.Request) {
+	forceReset := r.FormValue("forceReset")
+	if forceReset == "1" {
+		serveHome(w, r)
+		return
+	}
+
 	alreadySet, clientIp, ipFileLine := isIpAlreadySet(r)
 	if !alreadySet {
 		serveHome(w, r)
@@ -56,6 +66,7 @@ func serveTools(clientIp string, ipFileLine IpFileLine, w http.ResponseWriter) {
 func isIpAlreadySet(r *http.Request) (bool, string, *IpFileLine) {
 	clientIP := go_utils.GetClientIp(r)
 	isPrivateIP, _ := go_utils.IsPrivateIP(clientIP)
+	fmt.Println("clientIP:", clientIP, ", isPrivateIP:", isPrivateIP)
 	if isPrivateIP {
 		return false, clientIP, nil
 	}

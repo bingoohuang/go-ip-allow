@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/bingoohuang/go-utils"
 	"log"
 	"net/http"
 	"os/exec"
 	"strings"
-	"encoding/json"
 )
 
 func serveIpAllow(w http.ResponseWriter, r *http.Request) {

@@ -1,12 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bingoohuang/go-utils"
 	"log"
 	"net/http"
-	url2 "net/url"
 	"strconv"
 	"strings"
 )
@@ -23,20 +21,14 @@ func main() {
 }
 
 func MustAuth(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		cookie := CookieValue{}
-		go_utils.ReadCookie(r, conf.EncryptKey, conf.CookieName, &cookie)
-		if cookie.Name != "" {
-			json, _ := json.Marshal(&cookie)
-			r.Header.Set("CookieValue", string(json))
-			fn(w, r) // 执行被装饰的函数
-			return
-		}
-
-		url := conf.RedirectUri + "?redirect=" + url2.QueryEscape(conf.LocalUrl)
-
-		http.Redirect(w, r, url, 302)
-	}
+	forceLogin := true
+	return go_utils.MustAuth(fn, go_utils.MustAuthParam{
+		EncryptKey:  &conf.EncryptKey,
+		CookieName:  &conf.CookieName,
+		RedirectUri: &conf.RedirectUri,
+		LocalUrl:    &conf.LocalUrl,
+		ForceLogin:  &forceLogin,
+	})
 }
 
 func serveToolsIndex(w http.ResponseWriter, r *http.Request) {

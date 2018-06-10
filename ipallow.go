@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/bingoohuang/go-utils"
 	"log"
 	"net/http"
@@ -21,19 +20,14 @@ func serveIpAllow(w http.ResponseWriter, r *http.Request) {
 	envs := strings.TrimSpace(r.FormValue("envs"))
 	log.Println("officeIp:", officeIp, ",env:", envs)
 
-	cookie := CookieValue{}
-	cookieValue := r.Header.Get("CookieValue")
-	json.Unmarshal([]byte(cookieValue), &cookie)
-
-	ipAllow(&cookie, envs, officeIp)
+	cookie := r.Context().Value("CookieValue").(*go_utils.CookieValueImpl)
+	ipAllow(cookie, envs, officeIp)
 
 	w.Write([]byte("OK"))
 }
 
-func ipAllow(cookie *CookieValue, envs, officeIp string) {
+func ipAllow(cookie *go_utils.CookieValueImpl, envs, officeIp string) {
 	allowedIpLines := CreateAllowIpsFileLines(envs, officeIp, cookie.Name)
-	log.Println("CreateAllowIpsFileLines:", allowedIpLines)
-
 	allowedIps := joinAllowedIpLines(allowedIpLines)
 
 	go func() {

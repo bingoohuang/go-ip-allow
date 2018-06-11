@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/bingoohuang/go-utils"
   packages = ["."]
-  revision = "e0cbc63457020e6a305c0d67731b059826a1165c"
+  revision = "f3b63d8bc5d4a082c0958002eedbd5609d3f664c"
 
 [[projects]]
   branch = "master"
@@ -43,6 +43,7 @@
   version = "v2.3.5"
 
 [[projects]]
+  branch = "master"
   name = "github.com/tdewolff/parse"
   packages = [
     ".",
@@ -52,12 +53,11 @@
     "js",
     "strconv"
   ]
-  revision = "639f6272aec6b52094db77b9ec488214b0b4b1a1"
-  version = "v2.3.2"
+  revision = "d739d6fccb0971177e06352fea02d3552625efb1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "eb3a778e03ded2175c953847dc30ec650e915da2c9998ce8ec391bed83a6032b"
+  inputs-digest = "5f921ee54ddbb90396c4494bc1496176b87a1dfb9c444a564ef67ef0a5cd060f"
   solver-name = "gps-cdcl"
   solver-version = 1

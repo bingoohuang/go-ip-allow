@@ -9,7 +9,7 @@ import (
 )
 
 func serveIpAllow(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	go_utils.HeadContentTypeHtml(w)
 
 	officeIp := strings.TrimSpace(r.FormValue("officeIp"))
 	if !go_utils.IsIP4Valid(officeIp) {

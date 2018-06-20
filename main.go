@@ -48,6 +48,8 @@ func serveToolsIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveTools(clientIp string, ipFileLine IpFileLine, w http.ResponseWriter) {
+	go_utils.HeadContentTypeHtml(w)
+
 	toolsHtml := string(MustAsset("res/tools.html"))
 	toolsHtml = strings.Replace(toolsHtml, "{{CLIENT_IP}}", clientIp, -1)
 	toolsHtml = strings.Replace(toolsHtml, "{{USER_NAME}}", ipFileLine.User, -1)

@@ -5,10 +5,11 @@ import (
 	"github.com/bingoohuang/go-utils"
 	"net/http"
 	"strings"
-	"time"
 )
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
+	go_utils.HeadContentTypeHtml(w)
+
 	envCheckboxes := ""
 	for _, env := range conf.Envs {
 		envCheckboxes += fmt.Sprintf("<input class='env' type='checkbox' checked value='%v'>%v</input><br/>", env, env)
@@ -27,17 +28,4 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	html = strings.Replace(html, "/*.AUTOIP*/", clientIP, 1)
 
 	w.Write([]byte(html))
-}
-
-type CookieValue struct {
-	UserId    string
-	Name      string
-	Avatar    string
-	CsrfToken string
-	Expired   time.Time
-	Redirect  string
-}
-
-func (t *CookieValue) ExpiredTime() time.Time {
-	return t.Expired
 }

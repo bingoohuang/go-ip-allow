@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/bingoohuang/go-utils"
   packages = ["."]
-  revision = "e0cbc63457020e6a305c0d67731b059826a1165c"
+  revision = "4847ea2778fe4c9424aed9b4d461f6180827d34c"
 
 [[projects]]
   branch = "master"
@@ -52,8 +52,8 @@
     "js",
     "strconv"
   ]
-  revision = "639f6272aec6b52094db77b9ec488214b0b4b1a1"
-  version = "v2.3.2"
+  revision = "d739d6fccb0971177e06352fea02d3552625efb1"
+  version = "v2.3.3"
 
 [solve-meta]
   analyzer-name = "dep"
